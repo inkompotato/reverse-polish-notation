@@ -27,14 +27,56 @@ public class Postfix {
 	}
 	
 	public String infixToPostfix (String ifx){
-		int result;
+		ifx = ifx.trim().replaceAll("\\s", "");
+		char[] expr = ifx.toCharArray();
+		String result ="";
+		Stack <Character> p = new Stack<>();
+		for (int i = 0; i < expr.length; i++) {
+			if (expr[i] >= 48 && expr[i] <= 57)
+				result+=(Character.getNumericValue(expr[i]));
+			if (expr[i] == '(')
+				p.push(expr[i]);
+			if (expr[i] == ')') {
+				while (!p.peek().equals('(')) {
+					result += p.peek();
+					p.pop();
+				}
+				p.pop();
+			}
+			if (expr[i] == '*' || expr[i] == '-' || expr[i] == '+' || expr[i] == '/' || expr[i] == '^') {
+				while (!p.isEmpty() && !(checkPrecedence(p.peek(), expr[i]) || (expr[i] == '^' && p.peek().equals('^')))) {
+					result += p.peek();
+					p.pop();
+				}
+				p.push(expr[i]);
+			}
+		}
+
+		while (!p.isEmpty()){
+			result+=p.peek();
+			p.pop();
+		}
 		
 		
+		return result;
 		
-		
-		
-		return ifx;
-		
+	}
+
+	private boolean checkPrecedence(char top, char next) {
+		return getPrec(top) < getPrec(next);
+	}
+
+	private int getPrec(char operator){
+		switch (operator) {
+			case '(' : return 0;
+			case ')' : return 0;
+			case '+' : return 1;
+			case '-' : return 1;
+			case '*' : return 2;
+			case '/' : return 2;
+			case '^' : return 3;
+			default: return 0;
+		}
 	}
 
 	private void power() {
