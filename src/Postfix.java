@@ -1,7 +1,20 @@
+import java.util.Scanner;
 import java.util.Stack;
 
 
 public class Postfix {
+
+
+	public void input() {
+		Scanner sc = new Scanner(System.in);
+		boolean quit = false;
+		while(!quit) {
+            System.out.println("enter infix expression:");
+            String line = sc.nextLine();
+            if (line.equals("quit")) quit = true;
+            else System.out.println(evaluate2(infixToPostfix(line)));
+        }
+	}
 
 	private Stack s = new Stack();
 
@@ -25,6 +38,53 @@ public class Postfix {
 
 		return (int) s.peek();
 	}
+
+	//private Stack s2 = new Stack();
+
+	public int evaluate2 (String pfx) {
+	    String[] expr = pfx.split("\\s");
+	    for (String st : expr){
+	        
+	        char[] ch = st.toCharArray();
+            int numberLength = 0;
+	        for (int i = 0; i< ch.length; i++) {
+
+                if (ch[i] == '*') {
+                    multiply();
+                    numberLength = 0;
+                }
+                if (ch[i] == '-') {
+                    substract();
+                    numberLength = 0;
+                }
+                if (ch[i] == '+') {
+                    add();
+                    numberLength = 0;
+                }
+                if (ch[i] == '/') {
+                    divide();
+                    numberLength = 0;
+                }
+                if (ch[i] == '^') {
+                    power();
+                    numberLength = 0;
+                }
+                if (ch[i] >= 48 && ch[i] <= 57) {
+                    s.push(Character.getNumericValue(ch[i]));
+                    if (numberLength>0) {
+                        int second = (int) s.peek();
+                        s.pop();
+                        int first = (int) s.peek();
+                        s.pop();
+                        s.push(first*10 + second);
+                    }
+                    numberLength++;
+                }
+            }
+
+        }
+        return (int) s.peek();
+    }
 	
 	public String infixToPostfix (String ifx){
 		ifx = ifx.trim().replaceAll("\\s", "");
@@ -38,14 +98,15 @@ public class Postfix {
 				p.push(expr[i]);
 			if (expr[i] == ')') {
 				while (!p.peek().equals('(')) {
-					result += p.peek();
+					result += " "+p.peek();
 					p.pop();
 				}
 				p.pop();
 			}
 			if (expr[i] == '*' || expr[i] == '-' || expr[i] == '+' || expr[i] == '/' || expr[i] == '^') {
+			    result += " ";
 				while (!p.isEmpty() && !(checkPrecedence(p.peek(), expr[i]) || (expr[i] == '^' && p.peek().equals('^')))) {
-					result += p.peek();
+					result += " "+p.peek()+" ";
 					p.pop();
 				}
 				p.push(expr[i]);
@@ -53,7 +114,7 @@ public class Postfix {
 		}
 
 		while (!p.isEmpty()){
-			result+=p.peek();
+			result+=" "+p.peek();
 			p.pop();
 		}
 		
