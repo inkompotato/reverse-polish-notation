@@ -1,187 +1,223 @@
 import java.util.Scanner;
-import java.util.Stack;
+//import java.util.Stack;
 
 
 public class Postfix {
 
 
-	public void input() {
-		Scanner sc = new Scanner(System.in);
-		boolean quit = false;
-		while(!quit) {
+    public void input() {
+        Scanner sc = new Scanner(System.in);
+        boolean quit = false;
+        while (!quit) {
             System.out.println("enter infix expression:");
             String line = sc.nextLine();
             if (line.equals("quit")) quit = true;
             else System.out.println(evaluate2(infixToPostfix(line)));
         }
-	}
+    }
 
-	private Stack s = new Stack();
+    private Stack s = new Stack();
 
-	public int evaluate(String pfx) {
-		pfx = pfx.trim().replaceAll("\\s", "");
-		char[] expr = pfx.toCharArray();
-		for (int i = 0; i < expr.length; i++) {
-			if (expr[i] >= 48 && expr[i] <= 57)
-				s.push(Character.getNumericValue(expr[i]));
-			if (expr[i] == '*')
-				multiply();
-			if (expr[i] == '-')
-				substract();
-			if (expr[i] == '+')
-				add();
-			if (expr[i] == '/')
-				divide();
-			if (expr[i] == '^')
-				power();
-		}
+    /**
+     * method that evaluates a postfix expression
+     * @param pfx postfix expression
+     * @return result
+     */
+    public int evaluate(String pfx) {
 
-		return (int) s.peek();
-	}
+        pfx = pfx.trim().replaceAll("\\s", "");
+        char[] expr = pfx.toCharArray();
+        for (int i = 0; i < expr.length; i++) {
+            if (expr[i] >= 48 && expr[i] <= 57)
+                s.push(Character.getNumericValue(expr[i]));
+            if (expr[i] == '*')
+                multiply();
+            if (expr[i] == '-')
+                subtract();
+            if (expr[i] == '+')
+                add();
+            if (expr[i] == '/')
+                divide();
+            if (expr[i] == '^')
+                power();
+        }
 
-	//private Stack s2 = new Stack();
+        return (int) s.peek();
+    }
 
-	public int evaluate2 (String pfx) {
-	    String[] expr = pfx.split("\\s");
-	    for (String st : expr){
-	        
-	        char[] ch = st.toCharArray();
+    /**
+     * improved version of the evaluate- method, it now works with multi-digit numbers
+     * calculates a result out of a postfix expression
+     * @param pfx postfix expression
+     * @return result
+     */
+    public int evaluate2(String pfx) {
+        String[] expr = pfx.split("\\s");
+        for (String st : expr) {
+
+            char[] ch = st.toCharArray();
             int numberLength = 0;
-	        for (int i = 0; i< ch.length; i++) {
+            for (int i = 0; i < ch.length; i++) {
 
                 if (ch[i] == '*') {
                     multiply();
                     numberLength = 0;
                 }
-                if (ch[i] == '-') {
-                    substract();
+                else if (ch[i] == '-') {
+                    subtract();
                     numberLength = 0;
                 }
-                if (ch[i] == '+') {
+                else if (ch[i] == '+') {
                     add();
                     numberLength = 0;
                 }
-                if (ch[i] == '/') {
+                else if (ch[i] == '/') {
                     divide();
                     numberLength = 0;
                 }
-                if (ch[i] == '^') {
+                else if (ch[i] == '^') {
                     power();
                     numberLength = 0;
                 }
-                if (ch[i] >= 48 && ch[i] <= 57) {
+                else if (ch[i] >= 48 && ch[i] <= 57) {
                     s.push(Character.getNumericValue(ch[i]));
-                    if (numberLength>0) {
+                    if (numberLength > 0) {
                         int second = (int) s.peek();
                         s.pop();
                         int first = (int) s.peek();
                         s.pop();
-                        s.push(first*10 + second);
+                        s.push(first * 10 + second);
                     }
                     numberLength++;
                 }
+
+                else throw new UnknownCharacterException(ch[i]);
+
             }
 
         }
         return (int) s.peek();
     }
-	
-	public String infixToPostfix (String ifx){
-		ifx = ifx.trim().replaceAll("\\s", "");
-		char[] expr = ifx.toCharArray();
-		String result ="";
-		Stack <Character> p = new Stack<>();
-		for (int i = 0; i < expr.length; i++) {
-			if (expr[i] >= 48 && expr[i] <= 57)
-				result+=(Character.getNumericValue(expr[i]));
-			if (expr[i] == '(')
-				p.push(expr[i]);
-			if (expr[i] == ')') {
-				while (!p.peek().equals('(')) {
-					result += " "+p.peek();
-					p.pop();
-				}
-				p.pop();
-			}
-			if (expr[i] == '*' || expr[i] == '-' || expr[i] == '+' || expr[i] == '/' || expr[i] == '^') {
-			    result += " ";
-				while (!p.isEmpty() && !(checkPrecedence(p.peek(), expr[i]) || (expr[i] == '^' && p.peek().equals('^')))) {
-					result += " "+p.peek()+" ";
-					p.pop();
-				}
-				p.push(expr[i]);
-			}
-		}
 
-		while (!p.isEmpty()){
-			result+=" "+p.peek();
-			p.pop();
-		}
-		
-		
-		return result;
-		
-	}
+    /**
+     * takes an infix expression String and generates a postfix expression String out of it
+     * @param ifx infix expression
+     * @return postfix expression
+     */
+    public String infixToPostfix(String ifx) {
+        ifx = ifx.trim().replaceAll("\\s", "");
+        char[] expr = ifx.toCharArray();
+        String result = "";
+        Stack<Character> p = new Stack<>();
+        for (int i = 0; i < expr.length; i++) {
+            if (expr[i] >= 48 && expr[i] <= 57)
+                result += (Character.getNumericValue(expr[i]));
+            else if (expr[i] == '(')
+                p.push(expr[i]);
+            else if (expr[i] == ')') {
+                while (!p.peek().equals('(')) {
+                    result += " " + p.peek();
+                    p.pop();
+                }
+                p.pop();
+            }
+            else if (expr[i] == '*' || expr[i] == '-' || expr[i] == '+' || expr[i] == '/' || expr[i] == '^') {
+                result += " ";
+                while (!p.isEmpty() && !(checkPrecedence(p.peek(), expr[i]) || (expr[i] == '^' && p.peek().equals('^')))) {
+                    result += p.peek() + " ";
+                    p.pop();
+                }
+                p.push(expr[i]);
+            }
+            else throw new UnknownCharacterException(expr[i]);
+        }
 
-	private boolean checkPrecedence(char top, char next) {
-		return getPrec(top) < getPrec(next);
-	}
+        while (!p.isEmpty()) {
+            result += " " + p.peek();
+            p.pop();
+        }
 
-	private int getPrec(char operator){
-		switch (operator) {
-			case '(' : return 0;
-			case ')' : return 0;
-			case '+' : return 1;
-			case '-' : return 1;
-			case '*' : return 2;
-			case '/' : return 2;
-			case '^' : return 3;
-			default: return 0;
-		}
-	}
 
-	private void power() {
-		int op2 = (int) s.peek();
-		s.pop();
-		int op1 = (int) s.peek();
-		s.pop();
-		int result = (int) Math.pow(op1, op2);
-		s.push(result);
-	}
+        return result;
 
-	private void divide() {
-		int op2 = (int) s.peek();
-		s.pop();
-		int op1 = (int) s.peek();
-		s.pop();
-		int result = op1 / op2;
-		s.push(result);
-	}
+    }
 
-	private void add() {
-		int op2 = (int) s.peek();
-		s.pop();
-		int op1 = (int) s.peek();
-		s.pop();
-		int result = op1 + op2;
-		s.push(result);
-	}
+    private boolean checkPrecedence(char top, char next) {
+        return getPrec(top) < getPrec(next);
+    }
 
-	private void substract() {
-		int op2 = (int) s.peek();
-		s.pop();
-		int op1 = (int) s.peek();
-		s.pop();
-		int result = op1 - op2;
-		s.push(result);
-	}
+    private int getPrec(char operator) {
+        switch (operator) {
+            case '(':
+                return 0;
+            case ')':
+                return 0;
+            case '+':
+                return 1;
+            case '-':
+                return 1;
+            case '*':
+                return 2;
+            case '/':
+                return 2;
+            case '^':
+                return 3;
+            default:
+                return 0;
+        }
+    }
 
-	private void multiply() {
-		int op2 = (int) s.peek();
-		s.pop();
-		int op1 = (int) s.peek();
-		s.pop();
-		int result = op1 * op2;
-		s.push(result);
-	}
+    private void power() {
+        int op2 = (int) s.peek();
+        s.pop();
+        int op1 = (int) s.peek();
+        s.pop();
+        int result = (int) Math.pow(op1, op2);
+        s.push(result);
+    }
+
+    private void divide() {
+        int op2 = (int) s.peek();
+        s.pop();
+        int op1 = (int) s.peek();
+        s.pop();
+        int result = op1 / op2;
+        s.push(result);
+    }
+
+    private void add() {
+        int op2 = (int) s.peek();
+        s.pop();
+        int op1 = (int) s.peek();
+        s.pop();
+        int result = op1 + op2;
+        s.push(result);
+    }
+
+    private void subtract() {
+        int op2 = (int) s.peek();
+        s.pop();
+        int op1 = (int) s.peek();
+        s.pop();
+        int result = op1 - op2;
+        s.push(result);
+    }
+
+    private void multiply() {
+        int op2 = (int) s.peek();
+        s.pop();
+        int op1 = (int) s.peek();
+        s.pop();
+        int result = op1 * op2;
+        s.push(result);
+    }
+
+    private class UnknownCharacterException extends RuntimeException {
+        public UnknownCharacterException(char c) {
+            System.out.println("Error while parsing expression: Illegal Character: "+c);
+        }
+        public UnknownCharacterException() {
+            System.out.println("Error while parsing expression: Illegal Character");
+        }
+    }
 }
