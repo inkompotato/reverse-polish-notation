@@ -1,5 +1,3 @@
-import java.util.EmptyStackException;
-
 public class Stack<E> {
 
     private LList<E> list;

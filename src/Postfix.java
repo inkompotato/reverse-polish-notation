@@ -8,15 +8,24 @@ public class Postfix {
     public void input() {
         Scanner sc = new Scanner(System.in);
         boolean quit = false;
+
         while (!quit) {
-            System.out.println("enter infix expression:");
-            String line = sc.nextLine();
-            if (line.equals("quit")) quit = true;
-            else System.out.println(evaluate2(infixToPostfix(line)));
+
+                System.out.println("enter infix expression:");
+                String line = sc.nextLine();
+                if (line.equals("quit")) {
+                    quit = true;
+                }
+                else {
+                    try {
+                        System.out.println(evaluate2(infixToPostfix(line)));
+                    } catch (UnknownCharacterException e) {
+                }
+            }
         }
     }
 
-    private Stack s = new Stack();
+    private Stack<Integer> s = new Stack<>();
 
     /**
      * method that evaluates a postfix expression
@@ -42,7 +51,7 @@ public class Postfix {
                 power();
         }
 
-        return (int) s.peek();
+        return s.peek();
     }
 
     /**
@@ -51,7 +60,7 @@ public class Postfix {
      * @param pfx postfix expression
      * @return result
      */
-    public int evaluate2(String pfx) {
+    public int evaluate2(String pfx) throws UnknownCharacterException{
         String[] expr = pfx.split("\\s");
         for (String st : expr) {
 
@@ -96,7 +105,7 @@ public class Postfix {
             }
 
         }
-        return (int) s.peek();
+        return s.peek();
     }
 
     /**
@@ -104,7 +113,7 @@ public class Postfix {
      * @param ifx infix expression
      * @return postfix expression
      */
-    public String infixToPostfix(String ifx) {
+    public String infixToPostfix(String ifx) throws UnknownCharacterException{
         ifx = ifx.trim().replaceAll("\\s", "");
         char[] expr = ifx.toCharArray();
         String result = "";
@@ -220,4 +229,6 @@ public class Postfix {
             System.out.println("Error while parsing expression: Illegal Character");
         }
     }
+
 }
+
