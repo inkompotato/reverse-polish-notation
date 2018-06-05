@@ -124,11 +124,15 @@ public class Postfix {
             else if (expr[i] == '(')
                 p.push(expr[i]);
             else if (expr[i] == ')') {
-                while (!p.peek().equals('(')) {
-                    result += " " + p.peek();
+                try {
+                    while (!p.peek().equals('(')) {
+                        result += " " + p.peek();
+                        p.pop();
+                    }
                     p.pop();
+                } catch (NullPointerException e) {
+                    System.out.println("Warning while parsing expression: Empty Stack, too many closing parentheses");
                 }
-                p.pop();
             }
             else if (expr[i] == '*' || expr[i] == '-' || expr[i] == '+' || expr[i] == '/' || expr[i] == '^') {
                 result += " ";
@@ -224,6 +228,7 @@ public class Postfix {
     private class UnknownCharacterException extends RuntimeException {
         public UnknownCharacterException(char c) {
             System.out.println("Error while parsing expression: Illegal Character: "+c);
+            //printStackTrace();
         }
         public UnknownCharacterException() {
             System.out.println("Error while parsing expression: Illegal Character");
